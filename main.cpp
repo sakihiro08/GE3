@@ -7,15 +7,13 @@
 #include <DirectXMath.h>
 #include <DirectXTex.h>
 #include <d3dcompiler.h>
-#define DIRECTINPUT_VERSION     0x0800   // DirectInputのバージョン指定
-#include <dinput.h>
-#include <wrl.h>
 
+#include <wrl.h>
+#include"input.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "dinput8.lib")
-#pragma comment(lib, "dxguid.lib")
+
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -219,7 +217,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // ウィンドウサイズ
     const int window_width = 1280;  // 横幅
     const int window_height = 720;  // 縦幅
-
+    //ポインタ
+    Input* input = nullptr;
+   
     // ウィンドウクラスの設定
     WNDCLASSEX w{};
     w.cbSize = sizeof(WNDCLASSEX);
@@ -253,7 +253,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     MSG msg{};  // メッセージ
 #pragma endregion
-
+     //入力の初期化
+    input = new Input();
+    input->Initialize(w.hInstance, hwnd);
+    
 #pragma region DirectX初期化処理
     // DirectX初期化処理　ここから
     HRESULT result;
@@ -469,21 +472,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
     // DirectInputの初期化
-    ComPtr<IDirectInput8> directInput;
-    result = DirectInput8Create(
-        w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
-    assert(SUCCEEDED(result));
+ 
 
-    // キーボードデバイスの生成
-    ComPtr<IDirectInputDevice8> keyboard;
-    result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-    // 入力データ形式のセット
-    result = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
-    assert(SUCCEEDED(result));
-    // 排他制御レベルのセット
-    result = keyboard->SetCooperativeLevel(
-        hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-    assert(SUCCEEDED(result));
+
 
 #pragma region 描画初期化処理
 
@@ -969,9 +960,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         }
 
         // キーボード情報の取得開始
-        keyboard->Acquire();
+        input->Update();
         // 全キーの入力状態を取得する
-        keyboard->GetDeviceState(sizeof(key), key);
+       
 
         //// 数字の0キーが押されていたら
         //if (key[DIK_0]) 
@@ -1125,6 +1116,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // ウィンドウクラスを登録解除
     UnregisterClass(w.lpszClassName, w.hInstance);
-
+    //入力
+    delete input;
     return 0;
 }
