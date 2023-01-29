@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region 最初のシーンの初期化
    
     Sprite* sprite = new Sprite();
-     sprite->Initialize(_sptriteCommon);
+     sprite->Initialize(sptriteCommon);
     
 #pragma endregion 最初のシーンの初期化
 
