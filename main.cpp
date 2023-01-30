@@ -30,16 +30,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     // DirectInputの初期化
     SpriteCommon* spriteCommon = nullptr;
     spriteCommon = new SpriteCommon;
-    spriteCommon->Initialize();
-
+    spriteCommon->Initialize(dxCommon);
+    spriteCommon->LoadTexture(0, "rexture.png");
+        spriteCommon->LoadTexture(1, "reimu.png");
 
 
 
 #pragma region 最初のシーンの初期化
-   
+    Sprite* sprite = nullptr;
     Sprite* sprite = new Sprite();
-     sprite->Initialize(sptriteCommon);
-    
+    sprite->SetTextureIndex(1);
+     sprite->Initialize(spriteCommon);
+   
 #pragma endregion 最初のシーンの初期化
 
    
@@ -56,19 +58,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region 基礎システムの更新
 #pragma endregion 基礎システムの更新
 #pragma region 最初のシーンの更新
+
+        DirectX::XMFLOAT2 size = sprite->Getsize();
+        size.y += 1.0f;
+        sprite->setSize(size);
+        sprite->Update();
+
         //ポケモンアニメ出禁を書く
         dxCommon->PreDraw();
         spriteCommon->PreDraw();
+
         sprite->Draw();
+        spriteCommon->PostDraw();
 #pragma endregion 最初のシーンの更新
         dxCommon->PostDraw();
     }
 #pragma region 最初のシーンの終了
    
+ 
+#pragma endregion 最初のシーンの終了
+#pragma endregion 基礎システム終了  
     delete sprite;
     sprite = nullptr;
-#pragma endregion 最初のシーンの終了
-#pragma endregion 基礎システム終了
     delete spriteCommon;
     spriteCommon = nullptr;
      delete input; 
