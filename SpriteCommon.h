@@ -4,6 +4,7 @@
 #include<wrl.h>
 #include"DirectXCommon.h"
 #include<array>
+#include<string>
 class SpriteCommon
 {
 
@@ -22,10 +23,11 @@ private:
 	DirectXCommon* dxCommon;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState>pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature>rootSIgnsture;
+		//ヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>srvHeap;
 
 	//テクスチャバッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>,kMaxSRVCount>texBuff;
 
-	//ヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>srvHeap;
+
 };

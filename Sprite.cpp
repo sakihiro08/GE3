@@ -2,11 +2,11 @@
 #include<cassert>
 using namespace DirectX;
 using namespace Microsoft::WRL;
-void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
+void Sprite::Initialize(SpriteCommon* _spriteCommon,uint32_t textureIndex)
 {
-	HRESULT result();
+	HRESULT result;
 	assert(_spriteCommon);
-	spriteCommon* _spriteCommon;
+	spriteCommon=_spriteCommon;
 	//テクスチャサイズ
 	if (textureIndex!=UINT32_MAX)
 	{
@@ -33,8 +33,8 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 	//頂点データ
 	float left = (0.0f - anchorPoint.x) * size.x;
 	    float right= (1.0f - anchorPoint.x) * size.x;
-	    float top= (0.0f - anchorPoint.x) * size.y;
-	    float bottom= (1.0f - anchorPoint.x) * size.y;
+	    float top= (0.0f - anchorPoint.y) * size.y;
+	    float bottom= (1.0f - anchorPoint.y) * size.y;
 		if (IsFlipX)
 		{
 			left = -left;
@@ -67,9 +67,9 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 	resDesc.SampleDesc.Count = 1;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	//頂点バッファの作成
-	ID3D12Resource* vertBuff = nullptr;
 
-	HRESULT result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
+
+	 result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
 		&heapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -80,7 +80,7 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 
 	//転送
 	Vertex* vertMap = nullptr;
-	HRESULT result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	 result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	assert(SUCCEEDED(result));
 	//全頂点
 	for (int i = 0; i < _countof(vertices); i++)
@@ -90,10 +90,10 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 	//つながりを解除
 	vertBuff->Unmap(0, nullptr);
 	//頂点バッファビューの作成
-	D3D12_VERTEX_BUFFER_VIEW vbview{};
+
 	//GPU仮想
-	vbview.BufferLocation = vertBuff->GetGPUVirtualAddress();
-	vbview.SizeInBytes = sizeVB;
+	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	vbView.SizeInBytes = sizeVB;
 	// 頂点データ1つ分のサイズ
 	vbView.StrideInBytes = sizeof(vertices[0]);
 	{
@@ -109,9 +109,9 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 		cbResourceDesc.MipLevels = 1;
 		cbResourceDesc.SampleDesc.Count = 1;
 		cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		ID3D12Resource* constBuffMaterial = nullptr;
+	
 		// 定数バッファの生成
-	HRESULT	result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
+		result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
 			&cbHeapProp, // ヒープ設定
 			D3D12_HEAP_FLAG_NONE,
 			&cbResourceDesc, // リソース設定
@@ -121,7 +121,7 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 	};
 	assert(SUCCEEDED(result));
 	// 定数バッファのマッピング
-	HRESULT result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); // マッピング
+	 result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); // マッピング
 	assert(SUCCEEDED(result));
 	// 値を書き込むと自動的に転送される
 	constMapMaterial->color = color;              // RGBAで半透明の赤
@@ -141,7 +141,7 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 		cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 		// 定数バッファの生成
-		HRESULT result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
+		 result = spriteCommon->GetDirectXComon()->GetDevice()->CreateCommittedResource(
 			&cbHeapProp, // ヒープ設定
 			D3D12_HEAP_FLAG_NONE,
 			&cbResourceDesc, // リソース設定
@@ -150,13 +150,11 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 			IID_PPV_ARGS(&constBuffTransform));
 
 		assert(SUCCEEDED(result));
-	HRESULT	result = constBuffTransform->Map(0, nullptr, (void**)&constMapTransform); // マッピング
+	result = constBuffTransform->Map(0, nullptr, (void**)&constMapTransform); // マッピング
 		assert(SUCCEEDED(result));
 		//ワールド
 		XMMATRIX matWorld;
 		matWorld = XMMatrixIdentity();
-		rotationZ = 0.f;
-		position={0.f,0.f,0.f};
 		//回転
 		XMMATRIX matRot;
 		matRot = XMMatrixIdentity();
@@ -164,7 +162,7 @@ void Sprite::Initialize(SpriteCommon* _sptriteCommon,uint32_t textureIndex)
 		matWorld *= matRot;
 		//平行
 		XMMATRIX matTrans;
-         matTrans *= XMMatrixTranslation(position.x, position.y, 0.f);
+         matTrans = XMMatrixTranslation(position.x, position.y, 0.f);
 		matWorld *= matTrans;
 		//射影
 		XMMATRIX matProjection = XMMatrixOrthographicOffCenterLH(
@@ -182,8 +180,8 @@ void Sprite::Update()
 {
 	float left = (0.0f - anchorPoint.x) * size.x;
 	float right = (1.0f - anchorPoint.x) * size.x;
-	float top = (0.0f - anchorPoint.x) * size.y;
-	float bottom = (1.0f - anchorPoint.x) * size.y;
+	float top = (0.0f - anchorPoint.y) * size.y;
+	float bottom = (1.0f - anchorPoint.y) * size.y;
 	if (IsFlipX)
 	{
 		left = -left;
@@ -194,11 +192,25 @@ void Sprite::Update()
 		top = -top;
 		bottom = -bottom;
 	}// x      y     z       u     v
-	vertices[LB] = { {0.0f, size.y, 0.0f}, {0.0f, 1.0f} }; // 左下
-		vertices[LT] = { {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f} };// 左上
-		vertices[RB] = { {size.x,size.y, 0.0f}, {1.0f, 1.0f} }; // 右下
-		vertices[RT] = { {size.x, 0.0, 0.0f}, {1.0f, 0.0f} };// 右上
-	
+	vertices[LB].pos = { left, bottom, 0.0f };
+	vertices[LT].pos = { left, top, 0.0f };
+	vertices[RB].pos = { right,bottom, 0.0f };
+	vertices[RT].pos = { right, top, 0.0f };//uv
+		{
+			ID3D12Resource* textureBuffer = spriteCommon->GetTextureBuffer(textureIndex);
+			if (textureBuffer)
+			{
+				D3D12_RESOURCE_DESC resDesc = textureBuffer->GetDesc();
+				float tex_left = textureLefttop.x / resDesc.Width;
+				float tex_right = (textureLefttop.x + texturesize.x) / resDesc.Width;
+				float tex_top = textureLefttop.y / resDesc.Height;
+				float tex_bottom = (textureLefttop.y + texturesize.y) / resDesc.Height;
+				vertices[LB].uv = { tex_left,tex_bottom };
+				vertices[LT].uv = { tex_left,tex_top };
+				vertices[RB].uv = { tex_right,tex_bottom };
+				vertices[RT].uv = { tex_right,tex_top };
+			}
+		}
 	//転送
 		Vertex* vertMap = nullptr;
 	HRESULT result = vertBuff->Map(0, nullptr, (void**)&vertMap);
@@ -221,7 +233,7 @@ void Sprite::Update()
 
 	//平行
 	XMMATRIX matTrans;
-	matTrans *= XMMatrixTranslation(position.x, position.y, 0.f);
+	matTrans = XMMatrixTranslation(position.x, position.y, 0.f);
 	matWorld *= matTrans;
 
 	//射影
@@ -243,7 +255,7 @@ void Sprite::Draw()
 	//テクスチャコマンド
 	spriteCommon->SetTextureCommands(textureIndex);
 	// 頂点バッファビューの設定コマンド
-	spriteCommon->GetDirectXComon()->GetCommandList()->IASetVertexBuffers(0, 1, vbView);
+	spriteCommon->GetDirectXComon()->GetCommandList()->IASetVertexBuffers(0, 1, &vbView);
 	// 定数バッファビュー(CBV)の設定コマンド
 	spriteCommon->GetDirectXComon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 	spriteCommon->GetDirectXComon()->GetCommandList()->SetGraphicsRootConstantBufferView(2, constBuffTransform->GetGPUVirtualAddress());

@@ -3,6 +3,8 @@
 #include"DirectXCommon.h"
 #include"SpriteCommon.h"
 #include"Sprite.h"
+
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) 
 {
@@ -13,7 +15,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     Winapp* winApp = nullptr;
     winApp = new Winapp();
     winApp->Initialize();
-    Input* input = nullptr;
+
     HRESULT result;
     MSG msg{};  // メッセージ
 #pragma endregion
@@ -22,7 +24,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     input = new Input();
     input->Initialize(winApp);
 
-#pragma endregion　基礎システムの初期化
+#pragma endregion
     //ポインタ
     DirectXCommon* dxCommon = nullptr;
     dxCommon = new DirectXCommon();
@@ -31,16 +33,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     SpriteCommon* spriteCommon = nullptr;
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
-    spriteCommon->LoadTexture(0, "rexture.png");
-        spriteCommon->LoadTexture(1, "reimu.png");
+    spriteCommon->LoadTexture(0, "texture.png");
+     spriteCommon->LoadTexture(1, "reimu.png");
 
 
 
 #pragma region 最初のシーンの初期化
-    Sprite* sprite = nullptr;
+
     Sprite* sprite = new Sprite();
     sprite->SetTextureIndex(1);
-     sprite->Initialize(spriteCommon);
+     sprite->Initialize(spriteCommon,1);
    
 #pragma endregion 最初のシーンの初期化
 
@@ -77,7 +79,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
    
  
 #pragma endregion 最初のシーンの終了
-#pragma endregion 基礎システム終了  
+#pragma endregion 基礎システム終了 
+
     delete sprite;
     sprite = nullptr;
     delete spriteCommon;

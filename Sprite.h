@@ -55,7 +55,7 @@ public:
 	void SetTextureIndex(uint32_t index) { this->textureIndex = index; }
 	void SetTexturelefttop(const DirectX::XMFLOAT2 lefttop) { this->textureLefttop = lefttop; }
 	void SetTexturesize(const DirectX::XMFLOAT2 size) { this->texturesize = size; }
-	void SetTextureIndex(uint32_t index) { this->textureIndex = index; }
+	//void SetTextureIndex(uint32_t index) { this->textureIndex = index; }
 private:
 	void AdjustTextureSize();
 private:

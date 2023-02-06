@@ -38,6 +38,7 @@
     <None Include="Resources\shaders\Basic.hlsli">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="OBJShaderHeader.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\BasicPS.hlsl">
@@ -46,6 +47,8 @@
     <FxCompile Include="Resources\shaders\BasicVS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="OBJPixelShader.hlsl" />
+    <FxCompile Include="OBJVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Input.h">

@@ -5,7 +5,7 @@
 #include<DirectXTex.h>
 #include<d3dx12.h>
 #include<string>
-#pragma comment(lib,"dedcompiler.lib")
+#pragma comment(lib,"d3dcompiler.lib")
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
@@ -14,7 +14,7 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 {
 	HRESULT result{};
 	assert(_dxCommon);
-	dxCommon* _dxCommon;
+	dxCommon= _dxCommon;
 
 
 	// SRVの最大個数
@@ -27,7 +27,7 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 	srvHeapDesc.NumDescriptors = kMaxSRVCount;
 
 	// 設定を元にSRV用デスクリプタヒープを生成
-	ID3D12DescriptorHeap* srvHeap = nullptr;
+	
 	result = dxCommon->GetDevice()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
 	assert(SUCCEEDED(result));
 	
@@ -37,7 +37,7 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 	ID3DBlob* errorBlob = nullptr;
 	//頂点シェーダの読み込みとコんパイル
 	result = D3DCompileFromFile(
-		L"SpriteVS.hlsl",
+		L"Resources/shaders/BasicVS.hlsl",
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		"main", "vs_5_0",
@@ -56,17 +56,18 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 		//エラー内容を出力
 		OutputDebugStringA(error.c_str());
 		assert(0);
-		//ピクセルシェーダの読み込み
-		result = D3DCompileFromFile(
-			L"Resources/shader/BasicPS.hlsl",
-			nullptr,
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			"main", "ps_5_0",
-			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-			0,
-			&psBlob, &errorBlob);
+		
 
 	}
+	//ピクセルシェーダの読み込み
+	result = D3DCompileFromFile(
+		L"Resources/shaders/BasicPS.hlsl",
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main", "ps_5_0",
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+		0,
+		&psBlob, &errorBlob);
 	if (FAILED(result)) {
 		std::string error;
 		error.resize(errorBlob->GetBufferSize());
@@ -122,7 +123,7 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;             // 加算
 	blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;         // ソースのアルファ値
 	blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;    // 1.0f-ソースのアルファ値												
-　
+
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
     //図形の形状設定
@@ -184,9 +185,9 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 	assert(SUCCEEDED(result));
 	rootSigBlob->Release();
 	// パイプラインにルートシグネチャをセット
-	pipelineDesc.pRootSignature = rootSIgnsture;
+	pipelineDesc.pRootSignature = rootSIgnsture.Get();
 	// パイプランステートの生成
-	ID3D12PipelineState* pipelineState = nullptr;
+
 	result = dxCommon->GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 
@@ -194,10 +195,7 @@ void SpriteCommon::Initialize(DirectXCommon* _dxCommon)
 
 void SpriteCommon::PreDraw()
 {
-}
 
-void SpriteCommon::PostDraw()
-{
 	// プリミティブ形状の設定コマンド
 	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); // 三角形リスト
 	// パイプラインステートとルートシグネチャの設定コマンド
@@ -208,6 +206,10 @@ void SpriteCommon::PostDraw()
 	ID3D12DescriptorHeap* ppHeaps[] = { srvHeap.Get() };
 	dxCommon->GetCommandList()->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
+}
+
+void SpriteCommon::PostDraw()
+{
 }
 
 void SpriteCommon::LoadTexture(uint32_t index,const std::string&fileName)
